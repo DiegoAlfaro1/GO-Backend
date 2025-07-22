@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ../../ # <--- Root of your Go project
+      dockerfile: deployments/docker/Dockerfile
+    container_name: go-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../:/app # <--- Mount project root
+    networks:
+      - webapp-net
+
+  mongo:
+    image: mongo:6
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - webapp-net
+
+volumes:
+  mongo-data:
+
+networks:
+  webapp-net:

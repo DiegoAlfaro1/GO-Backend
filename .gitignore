@@ -1,0 +1,18 @@
+# Go build files
+/bin/
+/pkg/
+/*.exe
+*.log
+*.out
+*.test
+*.swp
+
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
