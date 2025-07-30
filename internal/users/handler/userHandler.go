@@ -25,10 +25,10 @@ func (h *UserHandler) RegisterRoutes(r *gin.Engine){
 	users := r.Group("/users")
 	{
 		users.GET("/", h.GetAll )
-		users.GET("/:id", h.GetOne)
 		users.POST("/", h.Create)
 		users.POST("/confirm", h.ConfirmAccount)
 		users.POST("/login", h.Login)
+		users.GET("/:id", h.GetOne)
 		users.DELETE("/:id", h.DeleteOne)
 	}
 }
@@ -89,6 +89,8 @@ func (h *UserHandler) ConfirmAccount(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to confirm account"})
 		return
 	}
+
+	//TODO: create cognito method to get a user info, then use the method create from cognito instead of create from email
 
 	// After successful confirmation, create user in local database
 	// Note: You'll need to get user details from Cognito or store them temporarily

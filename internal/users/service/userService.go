@@ -40,12 +40,11 @@ func (s *userServiceImpl) CreateUserFromCognito(name, email, customID string) (m
 }
 
 func (s *userServiceImpl) CreateUserFromEmail(email string) (model.User, error) {
-	// Generate a UUID for the user since we don't have cognito ID at confirmation
-	// In a real scenario, you might want to fetch user details from Cognito
+
 	user := model.User{
-		ID:    uuid.NewString(),
+		ID:    uuid.NewString(),  // TODO: Get this data from cognito
 		Email: email,
-		Name:  "", // You might want to fetch this from Cognito user attributes
+		Name:  "", // TODO: Get this data from cognito
 	}
 	return s.repo.CreateFromCognito(user)
 }
