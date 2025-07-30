@@ -3,32 +3,42 @@ version: "3.8"
 services:
   backend:
     build:
-      context: ../../ # <--- Root of your Go project
+      context: ../../
       dockerfile: deployments/docker/Dockerfile
     container_name: go-backend
     ports:
       - "8080:8080"
     depends_on:
-      - mongo
+      - postgres
     env_file:
       - ../../.env
     volumes:
-      - ../../:/app # <--- Mount project root
+      - ../../:/app
     networks:
       - webapp-net
 
-  mongo:
-    image: mongo:6
-    container_name: mongo-db
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB_NAME}
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - webapp-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  mongo-data:
+  postgres-data:
 
 networks:
   webapp-net:

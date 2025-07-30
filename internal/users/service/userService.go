@@ -1,19 +1,17 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/DiegoAlfaro1/gin-terraform/internal/users/model"
 	"github.com/DiegoAlfaro1/gin-terraform/internal/users/repository"
-	"github.com/DiegoAlfaro1/gin-terraform/internal/util"
+	"github.com/google/uuid"
 )
 
 type UserService interface {
 	GetAllUsers() ([]model.User, error)
 	GetOneUser(userID string) (model.User, error)
-	CreateUser(user model.User) (model.User, error)
-	DeleteOne(userID string) (error)
-
+	CreateUserFromCognito(name, email, customID string) (model.User, error)
+	CreateUserFromEmail(email string) (model.User, error)
+	DeleteOne(userID string) error
 }
 
 type userServiceImpl struct {
@@ -32,20 +30,26 @@ func (s *userServiceImpl) GetOneUser(userID string) (model.User, error) {
 	return s.repo.GetOneUser(userID)
 }
  
-func (s *userServiceImpl) CreateUser(user model.User) (model.User, error) {
-
-	hashedPassword, err := util.HashPassword(user.Password)
-
-	if err != nil {
-		return model.User{}, fmt.Errorf("error hashing password: %w", err)
+func (s *userServiceImpl) CreateUserFromCognito(name, email, customID string) (model.User, error) {
+	user := model.User{
+		ID:    customID,
+		Name:  name,
+		Email: email,
 	}
-
-	user.Password = hashedPassword
-
-	
-	return s.repo.Create(user)
+	return s.repo.CreateFromCognito(user)
 }
 
-func (s *userServiceImpl) DeleteOne(userID string) (error) {
+func (s *userServiceImpl) CreateUserFromEmail(email string) (model.User, error) {
+	// Generate a UUID for the user since we don't have cognito ID at confirmation
+	// In a real scenario, you might want to fetch user details from Cognito
+	user := model.User{
+		ID:    uuid.NewString(),
+		Email: email,
+		Name:  "", // You might want to fetch this from Cognito user attributes
+	}
+	return s.repo.CreateFromCognito(user)
+}
+
+func (s *userServiceImpl) DeleteOne(userID string) error {
 	return s.repo.DeleteOne(userID)
 }

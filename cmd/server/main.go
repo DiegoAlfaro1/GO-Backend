@@ -12,8 +12,8 @@ func main() {
 	// Step 1: Load .env file
 	config.LoadEnv() // loads environment variables from .env file
 
-	// Step 2: Initialize MongoDB connection
-	config.InitMongo() // connects MongoClient and assigns to global variable
+	// Step 2: Initialize Database connection
+	config.InitDatabaseConnection() 
 
 	// Step 3: Set up Gin
 	r := gin.Default()
