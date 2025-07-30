@@ -16,3 +16,18 @@
 # OS
 .DS_Store
 Thumbs.db
+
+deployments/.terraform/
+deployments/terraform/.terraform/
+deployments/terraform/*.tfstate
+deployments/terraform/*.tfstate.backup
+deployments/terraform/*.tfstate.lock.info
+deployments/terraform/*.tfplan
+deployments/terraform/*.tfvars
+deployments/terraform/*.tfvars.json
+deployments/terraform/override.tf
+deployments/terraform/*_override.tf
+deployments/terraform/.terraformrc
+deployments/terraform/terraform.rc
+deployments/terraform/crash.log
+deployments/terraform/crash.*.log

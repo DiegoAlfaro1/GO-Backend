@@ -21,9 +21,15 @@ type UserConfirmation struct {
 	Code  string `json:"code" binding:"required"`
 }
 
+type UserLogin struct {
+	Email string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
 type CognitoInterface interface {
 	SignUp(user *User) error
 	ConfirmAccount(user *UserConfirmation) error
+	SignIn(user *UserLogin) (string, error)
 }
 
 type cognitoClient struct {
@@ -83,4 +89,22 @@ func (c *cognitoClient) ConfirmAccount(user *UserConfirmation) error {
 	}
 	_, err := c.coginitoClient.ConfirmSignUp(confirmationInput)
 	return err
+}
+
+func (c *cognitoClient) SignIn(user *UserLogin) (string, error) {
+	authInput := &cognito.InitiateAuthInput{
+		AuthFlow: aws.String("USER_PASSWORD_AUTH"),
+		AuthParameters: aws.StringMap(map[string]string{
+			"USERNAME": user.Email,
+			"PASSWORD": user.Password,
+		}),
+		ClientId: aws.String(c.appClientID),
+	}
+
+	result, err := c.coginitoClient.InitiateAuth(authInput)
+	if err != nil {
+		return "", err
+	}
+
+	return *result.AuthenticationResult.AccessToken, nil
 }
