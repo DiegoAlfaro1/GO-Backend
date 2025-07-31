@@ -1,0 +1,298 @@
+# User API Tests
+# Use this file with REST Client extension in VS Code or similar HTTP clients
+# Base URL - adjust port if needed
+@baseUrl = http://localhost:8080
+
+###
+# Test 1: GET All Users (Empty Database)
+# Should return empty array [] initially
+GET {{baseUrl}}/users/
+Content-Type: application/json
+
+###
+# Test 2: CREATE User - Valid Data
+# Should register user in Cognito and return success message
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "TestPassword123!",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 3: CREATE User - Another Valid User
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Alice Johnson",
+  "email": "alice.johnson@test.com",
+  "password": "SecurePass123!",
+  "birthdate": "1985-03-15"
+}
+
+###
+# Test 4: CREATE User - Missing Required Field (Name)
+# Should return validation error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "email": "missing.name@example.com",
+  "password": "TestPassword123!",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 5: CREATE User - Missing Required Field (Email)
+# Should return validation error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "No Email User",
+  "password": "TestPassword123!",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 6: CREATE User - Missing Required Field (Password)
+# Should return validation error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "No Password User",
+  "email": "no.password@example.com",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 7: CREATE User - Missing Required Field (Birthdate)
+# Should return validation error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "No Birthdate User",
+  "email": "no.birthdate@example.com",
+  "password": "TestPassword123!"
+}
+
+###
+# Test 8: CREATE User - Invalid Email Format
+# Should return validation error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Invalid Email User",
+  "email": "invalid-email-format",
+  "password": "TestPassword123!",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 9: CREATE User - Weak Password
+# Should return Cognito error (depending on password policy)
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Weak Password User",
+  "email": "weak.password@example.com",
+  "password": "123",
+  "birthdate": "1990-01-15"
+}
+
+###
+# Test 10: CREATE User - Duplicate Email
+# Try creating user with same email as Test 2
+# Should return Cognito error
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Duplicate Email User",
+  "email": "john.doe@example.com",
+  "password": "AnotherPassword123!",
+  "birthdate": "1992-05-20"
+}
+
+###
+# Test 11: GET All Users Again
+# Should still return empty array (users not confirmed yet)
+GET {{baseUrl}}/users/
+Content-Type: application/json
+
+###
+# ==========================================
+# CONFIRMATION TESTS (Run after CREATE tests)
+# ==========================================
+
+###
+# Test 12: CONFIRM Account - Valid Confirmation
+# Replace with actual email and code from Cognito
+POST {{baseUrl}}/users/confirm
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "code": "123456"
+}
+
+###
+# Test 13: CONFIRM Account - Invalid Code
+POST {{baseUrl}}/users/confirm
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "code": "000000"
+}
+
+###
+# Test 14: CONFIRM Account - Invalid Email
+POST {{baseUrl}}/users/confirm
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "code": "123456"
+}
+
+###
+# Test 15: GET All Users After Confirmation
+# Should now show confirmed users in local database
+GET {{baseUrl}}/users/
+Content-Type: application/json
+
+###
+# ==========================================
+# LOGIN TESTS (Run after confirmation)
+# ==========================================
+
+###
+# Test 16: LOGIN - Valid Credentials
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "TestPassword123!"
+}
+
+###
+# Test 17: LOGIN - Invalid Password
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "WrongPassword123!"
+}
+
+###
+# Test 18: LOGIN - Invalid Email
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "password": "TestPassword123!"
+}
+
+###
+# Test 19: LOGIN - Missing Password
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com"
+}
+
+###
+# ==========================================
+# GET INDIVIDUAL USER TESTS
+# ==========================================
+
+###
+# Test 20: GET One User - Valid ID
+# Replace with actual user ID from database/previous responses
+GET {{baseUrl}}/users/550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+
+###
+# Test 21: GET One User - Invalid ID
+GET {{baseUrl}}/users/invalid-id
+Content-Type: application/json
+
+###
+# Test 22: GET One User - Non-existent ID  
+GET {{baseUrl}}/users/550e8400-e29b-41d4-a716-000000000000
+Content-Type: application/json
+
+###
+# ==========================================
+# DELETE TESTS (Use with caution)
+# ==========================================
+
+###
+# Test 23: DELETE User - Valid ID
+# Replace with actual user ID you want to delete
+DELETE {{baseUrl}}/users/550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+
+###
+# Test 24: DELETE User - Invalid ID
+DELETE {{baseUrl}}/users/invalid-id
+Content-Type: application/json
+
+###
+# Test 25: DELETE User - Non-existent ID
+DELETE {{baseUrl}}/users/550e8400-e29b-41d4-a716-000000000000
+Content-Type: application/json
+
+###
+# ==========================================
+# ADDITIONAL TEST USERS FOR BULK TESTING
+# ==========================================
+
+###
+# Additional Test User 1
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Bob Smith",
+  "email": "bob.smith@test.com",
+  "password": "AnotherPass456@",
+  "birthdate": "1992-07-22"
+}
+
+###
+# Additional Test User 2
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Sarah Wilson",
+  "email": "sarah.wilson@test.com",
+  "password": "MySecurePass789#",
+  "birthdate": "1988-12-03"
+}
+
+###
+# Additional Test User 3
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "name": "Mike Davis",
+  "email": "mike.davis@test.com",
+  "password": "StrongPassword101$",
+  "birthdate": "1995-06-18"
+}

@@ -92,9 +92,6 @@ func (h *UserHandler) ConfirmAccount(c *gin.Context) {
 
 	//TODO: create cognito method to get a user info, then use the method create from cognito instead of create from email
 
-	// After successful confirmation, create user in local database
-	// Note: You'll need to get user details from Cognito or store them temporarily
-	// For now, we'll create a basic user record
 	user, err := h.userService.CreateUserFromEmail(input.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user in local DB"})
