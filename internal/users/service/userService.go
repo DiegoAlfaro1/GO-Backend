@@ -31,6 +31,8 @@ func (s *userServiceImpl) GetOneUser(userID string) (model.User, error) {
 }
  
 func (s *userServiceImpl) CreateUserFromCognito(name, email, customID string) (model.User, error) {
+
+	//TODO: dont send the email etc just get the user from cognito and map it here
 	user := model.User{
 		ID:    customID,
 		Name:  name,
@@ -39,12 +41,13 @@ func (s *userServiceImpl) CreateUserFromCognito(name, email, customID string) (m
 	return s.repo.CreateFromCognito(user)
 }
 
+//DELETE
 func (s *userServiceImpl) CreateUserFromEmail(email string) (model.User, error) {
 
 	user := model.User{
-		ID:    uuid.NewString(),  // TODO: Get this data from cognito
+		ID:    uuid.NewString(), 
 		Email: email,
-		Name:  "", // TODO: Get this data from cognito
+		Name:  "", 
 	}
 	return s.repo.CreateFromCognito(user)
 }

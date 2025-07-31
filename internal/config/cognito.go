@@ -108,3 +108,7 @@ func (c *cognitoClient) SignIn(user *UserLogin) (string, error) {
 
 	return *result.AuthenticationResult.AccessToken, nil
 }
+
+// func (c *cognitoClient) GetUserFromEmail(email string) error {
+// 	//TODO: add method to get the user, i can since i am using the mail as username AdminGetUser
+// }
