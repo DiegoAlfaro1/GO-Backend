@@ -13,6 +13,7 @@ services:
       - ../../.env
     volumes:
       - ../../:/app
+      - ~/.aws:/root/.aws:ro
     networks:
       - webapp-net
 

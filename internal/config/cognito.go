@@ -30,6 +30,8 @@ type CognitoInterface interface {
 	SignUp(user *User) error
 	ConfirmAccount(user *UserConfirmation) error
 	SignIn(user *UserLogin) (string, error)
+	GetUserFromEmail(email string) (*cognito.AdminGetUserOutput, error)
+
 }
 
 type cognitoClient struct {
@@ -109,6 +111,18 @@ func (c *cognitoClient) SignIn(user *UserLogin) (string, error) {
 	return *result.AuthenticationResult.AccessToken, nil
 }
 
-// func (c *cognitoClient) GetUserFromEmail(email string) error {
-// 	//TODO: add method to get the user, i can since i am using the mail as username AdminGetUser
-// }
+func (c *cognitoClient) GetUserFromEmail(email string) (*cognito.AdminGetUserOutput, error) {
+	userPoolID := os.Getenv("COGNITO_USER_POOL_ID") // Make sure this is set in your .env or environment
+
+	input := &cognito.AdminGetUserInput{
+		UserPoolId: aws.String(userPoolID),
+		Username:   aws.String(email),
+	}
+
+	output, err := c.coginitoClient.AdminGetUser(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
+}
