@@ -6,25 +6,31 @@ import (
 
 	"github.com/DiegoAlfaro1/gin-terraform/internal/config"
 	"github.com/DiegoAlfaro1/gin-terraform/internal/users/model"
+	"github.com/DiegoAlfaro1/gin-terraform/internal/util"
 )
 
 type UserRepository interface {
 	GetAll() ([]model.User, error)
 	GetOneUser(userID string) (model.User, error)
 	GetOneUserByEmail(email string) (model.User, error)
-	CreateFromCognito(user model.User) (model.User, error)
+	CreateFromCognito(email string) (error)
 	DeleteOne(userID string) error
 }
 
-type userRepo struct {
+type UserRepo struct {
 	db *sql.DB
+	cognitoClient config.CognitoInterface
 }
 
-func NewUserRepository() UserRepository {
-	return &userRepo{db: config.DB}
+func NewUserRepository(cognitoClient config.CognitoInterface) UserRepository {
+	return &UserRepo{
+		db: config.DB,
+		cognitoClient: cognitoClient,
+	
+	}
 }
 
-func (r *userRepo) GetAll() ([]model.User, error) {
+func (r *UserRepo) GetAll() ([]model.User, error) {
 	rows, err := r.db.Query("SELECT id, name, email, COALESCE(birthdate, '') FROM users")
 	if err != nil {
 		return nil, err
@@ -44,7 +50,7 @@ func (r *userRepo) GetAll() ([]model.User, error) {
 	return users, nil
 }
 
-func (r *userRepo) GetOneUser(userID string) (model.User, error) {
+func (r *UserRepo) GetOneUser(userID string) (model.User, error) {
 	var user model.User
 	err := r.db.QueryRow(
 		"SELECT id, name, email, COALESCE(birthdate, '') FROM users WHERE id = $1",
@@ -61,7 +67,7 @@ func (r *userRepo) GetOneUser(userID string) (model.User, error) {
 	return user, nil
 }
 
-func (r *userRepo) GetOneUserByEmail(email string) (model.User, error) {
+func (r *UserRepo) GetOneUserByEmail(email string) (model.User, error) {
 	var user model.User
 	err := r.db.QueryRow(
 		"SELECT id, name, email, COALESCE(birthdate, '') FROM users WHERE email = $1",
@@ -78,18 +84,27 @@ func (r *userRepo) GetOneUserByEmail(email string) (model.User, error) {
 	return user, nil
 }
 
-func (r *userRepo) CreateFromCognito(user model.User) (model.User, error) {
+func (r *UserRepo) CreateFromCognito(email string) (error) {
+
+	rawUser, userErr := r.cognitoClient.GetUserFromEmail(email)
+
+	if userErr != nil {
+		return userErr
+	}
+
+	user := util.ExtractAttributes(rawUser)
+
 	_, err := r.db.Exec(
 		"INSERT INTO users (id, name, email, birthdate) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING",
-		user.ID, user.Name, user.Email, user.Birthdate,
+		user["custom:custom_id"], user["name"], user["email"], user["birthdate"],
 	)
 	if err != nil {
-		return model.User{}, err
+		return err
 	}
-	return user, nil
+	return nil
 }
 
-func (r *userRepo) DeleteOne(userID string) error {
+func (r *UserRepo) DeleteOne(userID string) error {
 	_, err := r.db.Exec("DELETE FROM users WHERE id = $1", userID)
 	return err
 }

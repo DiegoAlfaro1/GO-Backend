@@ -25,7 +25,7 @@ func main() {
     r := gin.Default()
 
     // Step 5: Initialize layers
-    userRepo := repository.NewUserRepository()
+    userRepo := repository.NewUserRepository(cognitoClient)
     userService := service.NewUserService(userRepo)
     userHandler := handler.NewUSerHandler(userService, cognitoClient)
 

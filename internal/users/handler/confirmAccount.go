@@ -22,16 +22,14 @@ func (h *UserHandler) ConfirmAccount(c *gin.Context) {
 		return
 	}
 
-	//TODO: create cognito method to get a user info, then use the method create from cognito instead of create from email
 
-	user, err := h.userService.CreateUserFromEmail(input.Email)
-	if err != nil {
+	userErr := h.userService.CreateUserFromEmail(input.Email)
+	if userErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user in local DB"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Account confirmed successfully",
-		"user":    user,
 	})
 }

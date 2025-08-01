@@ -3,13 +3,12 @@ package service
 import (
 	"github.com/DiegoAlfaro1/gin-terraform/internal/users/model"
 	"github.com/DiegoAlfaro1/gin-terraform/internal/users/repository"
-	"github.com/google/uuid"
 )
 
 type UserService interface {
 	GetAllUsers() ([]model.User, error)
 	GetOneUser(userID string) (model.User, error)
-	CreateUserFromEmail(email string) (model.User, error)
+	CreateUserFromEmail(email string) (error)
 	DeleteOne(userID string) error
 }
 
@@ -29,15 +28,8 @@ func (s *userServiceImpl) GetOneUser(userID string) (model.User, error) {
 	return s.repo.GetOneUser(userID)
 }
  
-
-func (s *userServiceImpl) CreateUserFromEmail(email string) (model.User, error) {
-
-	user := model.User{
-		ID:    uuid.NewString(), 
-		Email: email,
-		Name:  "", 
-	}
-	return s.repo.CreateFromCognito(user)
+func (s *userServiceImpl) CreateUserFromEmail(email string) (error) {
+	return s.repo.CreateFromCognito(email)
 }
 
 func (s *userServiceImpl) DeleteOne(userID string) error {
